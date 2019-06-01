@@ -1,7 +1,5 @@
 {% extends "base.html" %}
 
-{% block title %}Page Definitely Not Found{% endblock %}
-
 {% block css %}
 <style type="text/css">
   body{
@@ -23,7 +21,9 @@
 
 
 {% block main %}
-<h1>404</h1>
-<p>That page doesn't even exist! How did you even get yere, yo?</p>
-<p>Why don't you just <a href="{{ url_for('home') }}">go back home</a>?</p>
+<h1>FORMULAIC!</h1>
+<form method="POST">
+    <input name="text">
+    <input type="submit">
+</form>
 {% endblock %}

@@ -29,6 +29,16 @@ def about():
     """Render the website's about page."""
     return render_template('about.html')
 
+@app.route('/formulae/')
+def my_form():
+    """Render the website's form page."""
+    return render_template('someform.html')
+
+@app.route('/formulae/', methods=['POST'])
+def my_form_post():
+    text = request.form['text']
+    processed_text = text.upper()
+    return processed_text
 
 ###
 # The functions below should be applicable to all Flask apps.
