@@ -7,12 +7,16 @@ This file creates your application.
 """
 
 import os
+import requests
 from flask import Flask, render_template, request, redirect, url_for
 
 app = Flask(__name__)
 
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'this_should_be_configured')
 
+MG_API_KEY = os.environ.get('MAILGUN_API_KEY', 'shouldda_set_that_mg_api_key')
+MG_DOMAIN = os.environ.get('MAILGUN_DOMAIN', 'shouldda_set_that_mg_domain')
+MG_API_URL = "https://api:%s@api.mailgun.net/v2/%s" % (MG_API_KEY, MG_DOMAIN)
 
 ###
 # Routing for your application.
@@ -38,7 +42,27 @@ def my_form():
 def my_form_post():
     text = request.form['text']
     processed_text = text.upper()
-    return processed_text
+    return send_sbemail(processed_text)
+
+# just mah functionsz
+# mailgun doc/example as ruby
+# require 'rest-client'
+
+# RestClient.post API_URL+"/messages",
+#     :from => "ev@example.com",
+#     :to => "ev@mailgun.net",
+#     :subject => "This is subject",
+#     :text => "Text body",
+#     :html => "<b>HTML</b> version of the body!"
+def send_sbemail(email_addy):
+    mpayload = {'from': 'buckmeisterq@gmail.com',
+                'to': 'buckmeisterq@gmail.com',
+                'subject': 'test from mailgun',
+                'text': 'test body of mailgun message',
+                'html': '<b>HTML</b> body of test mailgun message'
+    }
+    respo = requests.post(MG_API_URL + "/messages", params=mpayload)
+    return "Sent to: %s with %s" % (email_addy, MG_API_URL)
 
 ###
 # The functions below should be applicable to all Flask apps.
