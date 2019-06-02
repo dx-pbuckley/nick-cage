@@ -62,7 +62,7 @@ def send_sbemail(email_addy):
                 'html': '<b>HTML</b> body of test mailgun message'
     }
     respo = requests.post(MG_API_URL + "/messages", params=mpayload)
-    return "Sent to: %s with %s" % (email_addy, MG_API_URL)
+    return "Sent to: %s" % (email_addy)
 
 ###
 # The functions below should be applicable to all Flask apps.
