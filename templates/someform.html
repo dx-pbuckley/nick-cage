@@ -23,7 +23,18 @@
 {% block main %}
 <h1>FORMULAIC!</h1>
 <form method="POST">
-    <input name="text">
-    <input type="submit">
+    <p>Email address</p>
+    <input name="emailaddress">
+    <p>Location:</p>
+    <!-- <input name="zipcode"> -->
+  <input list="browsers">
+  <datalist id="browsers">
+    <option value="Internet Explorer">
+    <option value="Firefox">
+    <option value="Chrome">
+    <option value="Opera">
+    <option value="Safari">
+  </datalist>
+    <p><input type="submit" value="Subscribe"></p>
 </form>
 {% endblock %}

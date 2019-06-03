@@ -16,7 +16,7 @@ app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'this_should_be_configur
 
 MG_API_KEY = os.environ.get('MAILGUN_API_KEY', 'shouldda_set_that_mg_api_key')
 MG_DOMAIN = os.environ.get('MAILGUN_DOMAIN', 'shouldda_set_that_mg_domain')
-MG_API_URL = "https://api:%s@api.mailgun.net/v2/%s" % (MG_API_KEY, MG_DOMAIN)
+MG_API_URL = "https://api:%s@api.mailgun.net/v3/%s" % (MG_API_KEY, MG_DOMAIN)
 
 ###
 # Routing for your application.
@@ -40,9 +40,10 @@ def my_form():
 
 @app.route('/formulae/', methods=['POST'])
 def my_form_post():
-    text = request.form['text']
-    processed_text = text.upper()
-    return send_sbemail(processed_text)
+    emailaddy = request.form['emailaddress']
+    zipcode = request.form['zipcode']
+    processed_email = emailaddy.upper()
+    return send_sbemail(processed_email, zipcode)
 
 # just mah functionsz
 # mailgun doc/example as ruby
@@ -54,15 +55,15 @@ def my_form_post():
 #     :subject => "This is subject",
 #     :text => "Text body",
 #     :html => "<b>HTML</b> version of the body!"
-def send_sbemail(email_addy):
-    mpayload = {'from': 'buckmeisterq@gmail.com',
+def send_sbemail(email_addy, zipcode):
+    mpayload = {'from': 'Excited User <mailgun@%s>' % (MG_DOMAIN),
                 'to': 'buckmeisterq@gmail.com',
-                'subject': 'test from mailgun',
-                'text': 'test body of mailgun message',
-                'html': '<b>HTML</b> body of test mailgun message'
+                'subject': 'test from mailgun heroku app',
+                'text': 'test body of mailgun message from heroku yep yep yeppers',
+                'html': '<b>HTML</b> body of test mailgun message as hitmal'
     }
     respo = requests.post(MG_API_URL + "/messages", params=mpayload)
-    return "Sent to: %s" % (email_addy)
+    return "Sent to: %s in: %s" % (email_addy, zipcode)
 
 ###
 # The functions below should be applicable to all Flask apps.
