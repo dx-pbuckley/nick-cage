@@ -5,7 +5,7 @@
   body{
     padding-top: 40px;
   }
-  h1, p{
+  h1, h3, p{
     text-align:center;
   }
   h1{
@@ -16,18 +16,44 @@
     font-size:24px;
     margin:15px 0;
   }
+  #email_form {
+    width:90%;
+    background-color: #bdd2ff;
+    border: 1px solid white;
+    margin: 50px auto 0;
+    padding: 1em;
+    -moz-border-radius: 10px;
+    -webkit-border-radius: 10px;
+    text-align: center;
+  }
+  input, form a {
+    border: none;
+    margin-right: 1em;
+    padding: 6px;
+    text-decoration: none;
+    font-size: 12px;
+    -moz-border-radius: 4px;
+    -webkit-border-radius: 4px;
+    background: #cfdeff;
+    color: black;
+    box-shadow: 0 1px 0 white;
+    -moz-box-shadow: 0 1px 0 white;
+    -webkit-box-shadow: 0 1px 0 white;
+    margin: auto;
+  }
 </style>
 {% endblock %}
 
 
 {% block main %}
-<h1>FORMULAIC!</h1>
+<div id="email_form">
+<h3>Weather Powered Email</h3>
 <form method="POST">
     <p>Email address</p>
-    <input name="emailaddress">
+    <input class="center-input" name="emailaddress">
     <p>Location:</p>
     <!-- <input name="zipcode"> -->
-  <input list="browsers">
+  <input class="center-input" list="browsers">
   <datalist id="browsers">
     <option value="Internet Explorer">
     <option value="Firefox">
@@ -37,4 +63,5 @@
   </datalist>
     <p><input type="submit" value="Subscribe"></p>
 </form>
+</div>
 {% endblock %}
