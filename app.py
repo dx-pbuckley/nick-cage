@@ -9,14 +9,29 @@ This file creates your application.
 import os
 import requests
 from flask import Flask, render_template, request, redirect, url_for
+from pymongo import MongoClient
 
 app = Flask(__name__)
 
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'this_should_be_configured')
 
+# host = os.environ['HUBOT_REST_INTERFACE_DB_PORT_27017_TCP_ADDR']
+# user = app.config['MONGO_DB_USER']
+# passwd = app.config['MONGO_DB_PASSWD']
+# uri = 'mongodb://%s:%s@%s:27017/?authSource=admin' % (user, passwd, host)
+# client = MongoClient(uri)
+# db = client[app.config['MONGO_DB_NAME']]
+# where db name is chewbot
+# db.chewbot.insert_one({'message': data, 'text': resp.text, 'status_code': resp.status_code,
+#                               'headers': resp.headers.items()})
+
+MONGO_URI = os.environ.get('MONGODB_URI', 'shouldda_set_that_mongodb_uri')
 MG_API_KEY = os.environ.get('MAILGUN_API_KEY', 'shouldda_set_that_mg_api_key')
 MG_DOMAIN = os.environ.get('MAILGUN_DOMAIN', 'shouldda_set_that_mg_domain')
 MG_API_URL = "https://api:%s@api.mailgun.net/v3/%s" % (MG_API_KEY, MG_DOMAIN)
+
+client = MongoClient(MONGO_URI)
+db = client[app.config['emailaddresses']]
 
 ###
 # Routing for your application.
@@ -45,6 +60,11 @@ def my_form_post():
     processed_email = emailaddy.upper()
     return send_sbemail(processed_email, zipcode)
 
+@app.route('/jscheck/')
+def js_form():
+    """Render the website's form page."""
+    return render_template('fakeform.html')
+
 # just mah functionsz
 # mailgun doc/example as ruby
 # require 'rest-client'
@@ -57,8 +77,8 @@ def my_form_post():
 #     :html => "<b>HTML</b> version of the body!"
 def send_sbemail(email_addy, zipcode):
     mpayload = {'from': 'Excited User <mailgun@%s>' % (MG_DOMAIN),
-                'to': 'buckmeisterq@gmail.com',
-                'subject': 'test from mailgun heroku app',
+                'to': '%s' % (email_addy),
+                'subject': 'test %s from mailgun heroku app' % (zipcode),
                 'text': 'test body of mailgun message from heroku yep yep yeppers',
                 'html': '<b>HTML</b> body of test mailgun message as hitmal'
     }

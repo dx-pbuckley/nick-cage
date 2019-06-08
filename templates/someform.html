@@ -1,5 +1,23 @@
 {% extends "base.html" %}
 
+{% block js %}
+function ValidateEmail(inputText)
+{
+var mailformat = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+if(inputText.value.match(mailformat))
+{
+document.emailform.emailaddress.focus();
+return true;
+}
+else
+{
+alert("You have entered an invalid email address!");
+document.emailform.emailaddress.focus();
+return false;
+}
+}
+{% endblock %}
+
 {% block css %}
 <style type="text/css">
   body{
@@ -48,7 +66,7 @@
 {% block main %}
 <div id="email_form">
 <h3>Weather Powered Email</h3>
-<form method="POST">
+<form name="emailform" method="POST" action="#">
     <p>Email address</p>
     <input class="center-input" name="emailaddress">
     <p>Location:</p>
@@ -58,7 +76,7 @@
     <option value="03079">Salem</option>
     <option value="02115">Boston</option>
   </datalist>
-    <p><input type="submit" value="Subscribe"></p>
+    <p><input type="submit" name="submit" value="Subscribe" onclick="ValidateEmail(document.emailform.emailaddress)"></p>
 </form>
 </div>
 {% endblock %}
