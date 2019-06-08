@@ -31,7 +31,7 @@ MG_DOMAIN = os.environ.get('MAILGUN_DOMAIN', 'shouldda_set_that_mg_domain')
 MG_API_URL = "https://api:%s@api.mailgun.net/v3/%s" % (MG_API_KEY, MG_DOMAIN)
 
 client = MongoClient(MONGO_URI)
-db = client[app.config['emailaddresses']]
+db = client['emailaddresses']
 
 ###
 # Routing for your application.
