@@ -10,6 +10,7 @@ import os
 import requests
 from flask import Flask, render_template, request, redirect, url_for
 import pymongo
+import json
 
 app = Flask(__name__)
 app.debug = True
@@ -29,6 +30,9 @@ MONGO_URI = os.environ.get('MONGODB_URI', 'shouldda_set_that_mongodb_uri')
 MG_API_KEY = os.environ.get('MAILGUN_API_KEY', 'shouldda_set_that_mg_api_key')
 MG_DOMAIN = os.environ.get('MAILGUN_DOMAIN', 'shouldda_set_that_mg_domain')
 MG_API_URL = "https://api:%s@api.mailgun.net/v3/%s" % (MG_API_KEY, MG_DOMAIN)
+
+WEATHERBIT_API_KEY = os.environ.get('WEATHERBIT_API_KEY', 'shouldda_set_that_wb_api_key')
+WEATHERBIT_API_URL = 'https://api.weatherbit.io/v2.0/current'
 
 CLIENT = pymongo.MongoClient(MONGO_URI)
 DB = CLIENT['em_addr']
@@ -109,6 +113,13 @@ def js_form():
 
 
 def fetch_weather(city):
+    wparams = { 'city': city,
+                'key' : WEATHERBIT_API_KEY
+    }
+    resp = requests.get(WEATHERBIT_API_URL, params=wparams)
+    # this works, need to likely raise for status, validate city (or pre-validate on the intake?)
+    # need to parse out the temp and desc from this json data structure returned
+    app.logger.info("Got Weather: %s" % (json.loads(resp.text)))
     return "55 and Sunny"
 
 
