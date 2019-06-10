@@ -44,6 +44,14 @@ NOTNICE_PAIR = { "subject": "Not so nice out? That's okay, enjoy a discount on u
 AVG_PAIR = { "subject": "Enjoy a discount on us.",
              "phrasing": "Fine with the" }
 
+# TOP_HUNDRED_LIST = [
+#     { 'name': 'Anchorage'},
+#     { 'name': 'Los Angeles'},
+#     { 'name': 'New York City'}
+#  ]
+
+TOP_HUNDRED_LIST = [ 'Bahstin', 'Nawyawk', 'Zebbs' ]
+
 ###
 # Routing for your application.
 ###
@@ -63,7 +71,7 @@ def about():
 @app.route('/formulae/')
 def my_form():
     """Render the website's form page."""
-    return render_template('someform.html')
+    return render_template('someform.html', top_hundred_cities=TOP_HUNDRED_LIST, boph='zobeeeeee')
 
 
 @app.route('/formulae/', methods=['POST'])
@@ -73,7 +81,9 @@ def my_form_post():
     # processed_email = emailaddy.upper()
     # return send_sbemail(processed_email, zipcode)
     addys = DB.em_addr
-    addy_id = addys.insert_one({'email': emailaddy, 'city': city })
+    one_record = {'email': emailaddy, 'city': city }
+    app.logger.info("Inserting into db: %s, %s" % (one_record['email'], one_record['city']))
+    addy_id = addys.insert_one(one_record)
     return "Sent to: %s in: %s (with id: %s)" % (emailaddy, city, addy_id)
 
 
@@ -97,12 +107,18 @@ def js_form():
 
 # just mah functionsz
 
-def subject_phrase_picker():
-    return AVG_PAIR, "55 and Sunny"
+
+def fetch_weather(city):
+    return "55 and Sunny"
+
+
+def subject_phrase_picker(city):
+    weather = fetch_weather(city)
+    return AVG_PAIR, weather
 
 
 def send_sbemail(email_addy, city):
-    given_pair, weather = subject_phrase_picker()
+    given_pair, weather = subject_phrase_picker(city)
     mailtext = '%s %s weather in %s!' % ( given_pair['phrasing'], weather, city)
     mpayload = {'from': 'Excited User <mailgun@%s>' % (MG_DOMAIN),
                 'to': '%s' % (email_addy),
@@ -110,6 +126,7 @@ def send_sbemail(email_addy, city):
                 'text': mailtext,
                 'html': '<b>HTML</b> body of test mailgun message as hitmal'
     }
+    # uncomment to really send the email
     # respo = requests.post(MG_API_URL + "/messages", params=mpayload)
     app.logger.info("Sent %s to: %s!" % (mailtext, email_addy))
     return "Sent %s to: %s!" % (mailtext, email_addy)
@@ -125,7 +142,7 @@ def send_bulk_emails():
           "city": "Anchorage"
         }
     ]
-    for email in collection:
+    for email in DB.em_addr.find(): # collection:
         send_sbemail(email['email'], email['city'])
 
 

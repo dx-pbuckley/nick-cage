@@ -69,12 +69,13 @@ return false;
 <form name="emailform" method="POST" action="#">
     <p>Email address</p>
     <input class="center-input" name="emailaddress">
-    <p>Location:</p>
+    <p>Location: {{ boph }}</p>
     <!-- <input name="zipcode"> -->
   <input class="center-input" name="zipcode" list="zipcodes">
   <datalist id="zipcodes">
-    <option value="03079">Salem</option>
-    <option value="02115">Boston</option>
+  {% for city in top_hundred_cities: %}
+    <option value="{{ city }}">{{ city }}</option>
+  {% endfor %}
   </datalist>
     <p><input type="submit" name="submit" value="Subscribe" onclick="ValidateEmail(document.emailform.emailaddress)"></p>
 </form>
