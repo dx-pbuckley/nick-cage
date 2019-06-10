@@ -9,10 +9,10 @@ This file creates your application.
 import os
 import requests
 from flask import Flask, render_template, request, redirect, url_for
-from pymongo import MongoClient
+import pymongo
 
 app = Flask(__name__)
-
+app.debug = True
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'this_should_be_configured')
 
 # host = os.environ['HUBOT_REST_INTERFACE_DB_PORT_27017_TCP_ADDR']
@@ -30,8 +30,19 @@ MG_API_KEY = os.environ.get('MAILGUN_API_KEY', 'shouldda_set_that_mg_api_key')
 MG_DOMAIN = os.environ.get('MAILGUN_DOMAIN', 'shouldda_set_that_mg_domain')
 MG_API_URL = "https://api:%s@api.mailgun.net/v3/%s" % (MG_API_KEY, MG_DOMAIN)
 
-client = MongoClient(MONGO_URI)
-db = client['emailaddresses']
+CLIENT = pymongo.MongoClient(MONGO_URI)
+DB = CLIENT['em_addr']
+# not right, everything matches email including "com" etc
+# DB.em_addr.create_index([('email', pymongo.TEXT)], unique=True)
+
+# sunny or +5 degrees
+NICE_PAIR = { "subject": "It's nice out! Enjoy a discount on us.",
+              "phrasing": "Hope you are enjoying the" }
+# either precipitating or 5 degrees cooler than the average
+NOTNICE_PAIR = { "subject": "Not so nice out? That's okay, enjoy a discount on us.",
+                 "phrasing": "Take a break from the" }
+AVG_PAIR = { "subject": "Enjoy a discount on us.",
+             "phrasing": "Fine with the" }
 
 ###
 # Routing for your application.
@@ -48,42 +59,75 @@ def about():
     """Render the website's about page."""
     return render_template('about.html')
 
+
 @app.route('/formulae/')
 def my_form():
     """Render the website's form page."""
     return render_template('someform.html')
 
+
 @app.route('/formulae/', methods=['POST'])
 def my_form_post():
     emailaddy = request.form['emailaddress']
-    zipcode = request.form['zipcode']
-    processed_email = emailaddy.upper()
-    return send_sbemail(processed_email, zipcode)
+    city = request.form['zipcode']
+    # processed_email = emailaddy.upper()
+    # return send_sbemail(processed_email, zipcode)
+    addys = DB.em_addr
+    addy_id = addys.insert_one({'email': emailaddy, 'city': city })
+    return "Sent to: %s in: %s (with id: %s)" % (emailaddy, city, addy_id)
+
+
+@app.route('/bulkup/')
+def bulk_form():
+    """Render the bulk send form page."""
+    return render_template('bulkform.html')
+
+
+@app.route('/bulkup/', methods=['POST'])
+def bulk_form_post():
+    send_bulk_emails()
+    return "Sent a bunch"
+
 
 @app.route('/jscheck/')
 def js_form():
     """Render the website's form page."""
     return render_template('fakeform.html')
 
-# just mah functionsz
-# mailgun doc/example as ruby
-# require 'rest-client'
 
-# RestClient.post API_URL+"/messages",
-#     :from => "ev@example.com",
-#     :to => "ev@mailgun.net",
-#     :subject => "This is subject",
-#     :text => "Text body",
-#     :html => "<b>HTML</b> version of the body!"
-def send_sbemail(email_addy, zipcode):
+# just mah functionsz
+
+def subject_phrase_picker():
+    return AVG_PAIR, "55 and Sunny"
+
+
+def send_sbemail(email_addy, city):
+    given_pair, weather = subject_phrase_picker()
+    mailtext = '%s %s weather in %s!' % ( given_pair['phrasing'], weather, city)
     mpayload = {'from': 'Excited User <mailgun@%s>' % (MG_DOMAIN),
                 'to': '%s' % (email_addy),
-                'subject': 'test %s from mailgun heroku app' % (zipcode),
-                'text': 'test body of mailgun message from heroku yep yep yeppers',
+                'subject': given_pair['subject'],
+                'text': mailtext,
                 'html': '<b>HTML</b> body of test mailgun message as hitmal'
     }
-    respo = requests.post(MG_API_URL + "/messages", params=mpayload)
-    return "Sent to: %s in: %s" % (email_addy, zipcode)
+    # respo = requests.post(MG_API_URL + "/messages", params=mpayload)
+    app.logger.info("Sent %s to: %s!" % (mailtext, email_addy))
+    return "Sent %s to: %s!" % (mailtext, email_addy)
+
+
+def send_bulk_emails():
+    """ Send the emails out """
+    collection = [
+        { "email": "buckmeisterq@gmail.com",
+          "city": "Salem"
+        },
+        { "email": "weatherapp+anc1@klaviyo1.com1",
+          "city": "Anchorage"
+        }
+    ]
+    for email in collection:
+        send_sbemail(email['email'], email['city'])
+
 
 ###
 # The functions below should be applicable to all Flask apps.
