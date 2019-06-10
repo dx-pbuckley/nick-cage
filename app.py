@@ -44,13 +44,13 @@ NOTNICE_PAIR = { "subject": "Not so nice out? That's okay, enjoy a discount on u
 AVG_PAIR = { "subject": "Enjoy a discount on us.",
              "phrasing": "Fine with the" }
 
-# TOP_HUNDRED_LIST = [
-#     { 'name': 'Anchorage'},
-#     { 'name': 'Los Angeles'},
-#     { 'name': 'New York City'}
-#  ]
+TOP_HUNDRED_LIST = [
+    { 'name': 'Anchorage', 'latlong': '456' },
+    { 'name': 'Los Angeles', 'latlong': '789' },
+    { 'name': 'New York City', 'latlong': '123'}
+ ]
 
-TOP_HUNDRED_LIST = [ 'Bahstin', 'Nawyawk', 'Zebbs' ]
+# TOP_HUNDRED_LIST = [ 'Bahstin', 'Nawyawk', 'Zebbs' ]
 
 ###
 # Routing for your application.
@@ -71,7 +71,7 @@ def about():
 @app.route('/formulae/')
 def my_form():
     """Render the website's form page."""
-    return render_template('someform.html', top_hundred_cities=TOP_HUNDRED_LIST, boph='zobeeeeee')
+    return render_template('someform.html', top_hundred_cities=[x['name'] for x in TOP_HUNDRED_LIST], boph='zobeeeeee')
 
 
 @app.route('/formulae/', methods=['POST'])
