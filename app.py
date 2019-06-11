@@ -105,14 +105,18 @@ def fetch_weather(city):
     }
     resp = requests.get(WEATHERBIT_API_URL, params=wparams)
     # this works, need to likely raise for status, validate city (or pre-validate on the intake?)
-    # need to parse out the temp and desc from this json data structure returned
-    app.logger.info("Got Weather: %s" % (json.loads(resp.text)))
-    return "55 and Sunny"
+    full_weather = json.loads(resp.text)
+    app.logger.info("Got full_weather: %s" % (full_weather))
+    weather_dict = {
+        'temp': full_weather['data'][0]['temp'],
+        'conditions': full_weather['data'][0]['weather']['description']
+    }
+    return weather_dict
 
 
 def subject_phrase_picker(city):
     weather = fetch_weather(city)
-    return AVG_PAIR, weather
+    return AVG_PAIR, "%s and %s" % (weather['temp'], weather['conditions'])
 
 
 def send_sbemail(email_addy, city):
