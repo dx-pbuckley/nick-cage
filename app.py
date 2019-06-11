@@ -59,35 +59,35 @@ def about():
     return render_template('about.html')
 
 
-@app.route('/formulae/')
+@app.route('/signup/')
 def my_form():
-    """Render the website's form page."""
-    return render_template('someform.html', top_hundred_cities=[x['name'] for x in TOP_HUNDRED_LIST], boph='zobeeeeee')
+    """Render the emailform page."""
+    return render_template('emailform.html', top_hundred_cities=[x['name'] for x in TOP_HUNDRED_LIST])
 
 
-@app.route('/formulae/', methods=['POST'])
+@app.route('/signup/', methods=['POST'])
 def my_form_post():
     emailaddy = request.form['emailaddress']
-    city = request.form['zipcode']
+    city = request.form['city_name']
     # processed_email = emailaddy.upper()
-    # return send_sbemail(processed_email, zipcode)
+    # return send_sbemail(processed_email, city_name)
     # addys = DB.em_addr # too many levels deep???
     one_record = {'email': emailaddy, 'city': city }
     app.logger.info("Inserting into db: %s / %s from client %s \n: record email %s, city %s" % (DB, DB.emaddrcol, CLIENT, one_record['email'], one_record['city']))
-    addy_id = DB.emaddrcol.insert_one(one_record)
-    return "Sent to: %s in: %s (with id: %s)" % (emailaddy, city, addy_id)
+    DB.emaddrcol.insert_one(one_record)
+    return "You are signed up with email: %s and city: %s!" % (emailaddy, city)
 
 
-@app.route('/bulkup/')
+@app.route('/admin/')
 def bulk_form():
     """Render the bulk send form page."""
     return render_template('bulkform.html')
 
 
-@app.route('/bulkup/', methods=['POST'])
+@app.route('/admin/', methods=['POST'])
 def bulk_form_post():
-    send_bulk_emails()
-    return "Sent a bunch"
+    total_sent = send_bulk_emails()
+    return "%s emails sent" % (total_sent)
 
 
 @app.route('/jscheck/')
@@ -132,9 +132,11 @@ def send_sbemail(email_addy, city):
 
 def send_bulk_emails():
     """ Send the emails out """
+    email_count = 0
     for email in DB.emaddrcol.find(): # collection:
         send_sbemail(email['email'], email['city'])
-
+        email_count += 1
+    return email_count
 
 ###
 # The functions below should be applicable to all Flask apps.

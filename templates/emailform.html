@@ -1,22 +1,5 @@
 {% extends "base.html" %}
 
-{% block js %}
-function ValidateEmail(inputText)
-{
-var mailformat = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-if(inputText.value.match(mailformat))
-{
-document.emailform.emailaddress.focus();
-return true;
-}
-else
-{
-alert("You have entered an invalid email address!");
-document.emailform.emailaddress.focus();
-return false;
-}
-}
-{% endblock %}
 
 {% block css %}
 <style type="text/css">
@@ -69,15 +52,15 @@ return false;
 <form name="emailform" method="POST" action="#">
     <p>Email address</p>
     <input class="center-input" name="emailaddress">
-    <p>Location: {{ boph }}</p>
-    <!-- <input name="zipcode"> -->
-  <input class="center-input" name="zipcode" list="zipcodes">
-  <datalist id="zipcodes">
+    <p>Location</p>
+    <!-- <input name="city_name"> -->
+  <input class="center-input" name="city_name" list="city_names">
+  <datalist id="city_names">
   {% for city in top_hundred_cities: %}
     <option value="{{ city }}">{{ city }}</option>
   {% endfor %}
   </datalist>
-    <p><input type="submit" name="submit" value="Subscribe" onclick="ValidateEmail(document.emailform.emailaddress)"></p>
+    <p><input type="submit" name="submit" value="Subscribe"></p>
 </form>
 </div>
 {% endblock %}
