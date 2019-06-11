@@ -108,8 +108,9 @@ def fetch_weather(city):
     full_weather = json.loads(resp.text)
     app.logger.info("Got full_weather: %s" % (full_weather))
     weather_dict = {
-        'temp': full_weather['data'][0]['temp'],
-        'conditions': full_weather['data'][0]['weather']['description']
+        'temp': round(9.0/5.0 * full_weather['data'][0]['temp'] + 32),
+        'conditions': full_weather['data'][0]['weather']['description'],
+        'precip': full_weather['data'][0]['precip']
     }
     return weather_dict
 
