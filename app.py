@@ -16,17 +16,7 @@ app = Flask(__name__)
 app.debug = True
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'this_should_be_configured')
 
-# host = os.environ['HUBOT_REST_INTERFACE_DB_PORT_27017_TCP_ADDR']
-# user = app.config['MONGO_DB_USER']
-# passwd = app.config['MONGO_DB_PASSWD']
-# uri = 'mongodb://%s:%s@%s:27017/?authSource=admin' % (user, passwd, host)
-# client = MongoClient(uri)
-# db = client[app.config['MONGO_DB_NAME']]
-# where db name is chewbot
-# db.chewbot.insert_one({'message': data, 'text': resp.text, 'status_code': resp.status_code,
-#                               'headers': resp.headers.items()})
-
-MONGO_URI = os.environ.get('MONGODB_URI', 'shouldda_set_that_mongodb_uri')
+MONGODB_URI = os.environ.get('MONGODB_URI', 'shouldda_set_that_mongodb_uri')
 MG_API_KEY = os.environ.get('MAILGUN_API_KEY', 'shouldda_set_that_mg_api_key')
 MG_DOMAIN = os.environ.get('MAILGUN_DOMAIN', 'shouldda_set_that_mg_domain')
 MG_API_URL = "https://api:%s@api.mailgun.net/v3/%s" % (MG_API_KEY, MG_DOMAIN)
@@ -34,8 +24,8 @@ MG_API_URL = "https://api:%s@api.mailgun.net/v3/%s" % (MG_API_KEY, MG_DOMAIN)
 WEATHERBIT_API_KEY = os.environ.get('WEATHERBIT_API_KEY', 'shouldda_set_that_wb_api_key')
 WEATHERBIT_API_URL = 'https://api.weatherbit.io/v2.0/current'
 
-CLIENT = pymongo.MongoClient(MONGO_URI)
-DB = CLIENT['em_addr']
+CLIENT = pymongo.MongoClient(MONGODB_URI)
+DB = CLIENT['heroku_xncgtv8c']
 # not right, everything matches email including "com" etc
 # DB.em_addr.create_index([('email', pymongo.TEXT)], unique=True)
 
@@ -81,10 +71,10 @@ def my_form_post():
     city = request.form['zipcode']
     # processed_email = emailaddy.upper()
     # return send_sbemail(processed_email, zipcode)
-    addys = DB.em_addr
+    # addys = DB.em_addr # too many levels deep???
     one_record = {'email': emailaddy, 'city': city }
-    app.logger.info("Inserting into db: %s, %s" % (one_record['email'], one_record['city']))
-    addy_id = addys.insert_one(one_record)
+    app.logger.info("Inserting into db: %s / %s from client %s \n: record email %s, city %s" % (DB, DB.emaddrcol, CLIENT, one_record['email'], one_record['city']))
+    addy_id = DB.emaddrcol.insert_one(one_record)
     return "Sent to: %s in: %s (with id: %s)" % (emailaddy, city, addy_id)
 
 
@@ -142,15 +132,7 @@ def send_sbemail(email_addy, city):
 
 def send_bulk_emails():
     """ Send the emails out """
-    collection = [
-        { "email": "buckmeisterq@gmail.com",
-          "city": "Salem"
-        },
-        { "email": "weatherapp+anc1@klaviyo1.com1",
-          "city": "Anchorage"
-        }
-    ]
-    for email in DB.em_addr.find(): # collection:
+    for email in DB.emaddrcol.find(): # collection:
         send_sbemail(email['email'], email['city'])
 
 
