@@ -48,11 +48,8 @@ NOTNICE_PAIR = { "subject": "Not so nice out? That's okay, enjoy a discount on u
 AVG_PAIR = { "subject": "Enjoy a discount on us.",
              "phrasing": "Fine with the" }
 
-TOP_HUNDRED_LIST = [
-    { 'name': 'Anchorage', 'latlong': '456' },
-    { 'name': 'Los Angeles', 'latlong': '789' },
-    { 'name': 'New York City', 'latlong': '123'}
- ]
+with open('static/top100cities.json') as f:
+    TOP_HUNDRED_LIST = json.load(f)
 
 # TOP_HUNDRED_LIST = [ 'Bahstin', 'Nawyawk', 'Zebbs' ]
 
