@@ -23,6 +23,7 @@ MG_API_URL = "https://api:%s@api.mailgun.net/v3/%s" % (MG_API_KEY, MG_DOMAIN)
 
 WEATHERBIT_API_KEY = os.environ.get('WEATHERBIT_API_KEY', 'shouldda_set_that_wb_api_key')
 WEATHERBIT_API_URL = 'https://api.weatherbit.io/v2.0/current'
+WEATHERBIT_FORECAST_URL = 'https://api.weatherbit.io/v2.0/forecast/daily'
 
 CLIENT = pymongo.MongoClient(MONGODB_URI)
 DB = CLIENT['heroku_xncgtv8c']
@@ -92,32 +93,52 @@ def bulk_form_post():
 
 @app.route('/jscheck/')
 def js_form():
-    """Render the website's form page."""
+    """testing some js malarkey"""
     return render_template('fakeform.html')
 
 
 # just mah functionsz
 
+def farenheit(ctemp):
+    return round(9.0/5.0 * ctemp + 32)
+
+
+def avg_based_on_forecast(city):
+    """ calc the avg based on next 16 day forecast """
+    wparams = { 'city': city,
+                'key': WEATHERBIT_API_KEY
+    }
+    resp = requests.get(WEATHERBIT_FORECAST_URL, params=wparams)
+    alltemps = [farenheit(x['temp']) for x in json.loads(resp.text)['data']]
+    return round(sum(alltemps) / len(alltemps))
+
 
 def fetch_weather(city):
     wparams = { 'city': city,
-                'key' : WEATHERBIT_API_KEY
+                'key': WEATHERBIT_API_KEY
     }
     resp = requests.get(WEATHERBIT_API_URL, params=wparams)
     # this works, need to likely raise for status, validate city (or pre-validate on the intake?)
     full_weather = json.loads(resp.text)
     app.logger.info("Got full_weather: %s" % (full_weather))
     weather_dict = {
-        'temp': round(9.0/5.0 * full_weather['data'][0]['temp'] + 32),
-        'conditions': full_weather['data'][0]['weather']['description'],
-        'precip': full_weather['data'][0]['precip']
+        'temp': farenheit(full_weather['data'][0]['temp']),
+        'conditions': full_weather['data'][0]['weather']['description'].lower(),
+        'precip': full_weather['data'][0]['precip'],
+        'forecast_temp': avg_based_on_forecast(city)
     }
     return weather_dict
 
 
 def subject_phrase_picker(city):
     weather = fetch_weather(city)
-    return AVG_PAIR, "%s and %s" % (weather['temp'], weather['conditions'])
+    if weather['precip'] or weather['precip'] > 0 or weather['temp'] <= (weather['forecast_temp'] - 5):
+        phrase = NOTNICE_PAIR
+    elif weather['temp'] >= (weather['forecast_temp'] + 5):
+        phrase = NICE_PAIR
+    else:
+        phrase = AVG_PAIR
+    return phrase, "%s and %s" % (weather['temp'], weather['conditions'])
 
 
 def send_sbemail(email_addy, city):
