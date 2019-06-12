@@ -61,24 +61,25 @@ def about():
 
 
 @app.route('/signup/')
-def my_form():
+def signup():
     """Render the emailform page."""
     return render_template('emailform.html', top_hundred_cities=[x['name'] for x in TOP_HUNDRED_LIST])
 
 
 @app.route('/signup/', methods=['POST'])
-def my_form_post():
+def signup_post():
     emailaddy = request.form['emailaddress']
     city = request.form['city_name']
     # processed_email = emailaddy.upper()
     # return send_sbemail(processed_email, city_name)
     # addys = DB.em_addr # too many levels deep???
     one_record = {'email': emailaddy, 'city': city }
-    app.logger.info("Inserting into db: %s / %s from client %s \n: record email %s, city %s" % (DB, DB.emaddrcol, CLIENT, one_record['email'], one_record['city']))
     try:
         DB.emaddrcol.insert_one(one_record)
+        app.logger.info("Inserting into db: %s / %s from client %s \n: record email %s, city %s" % (DB, DB.emaddrcol, CLIENT, one_record['email'], one_record['city']))
     except:
-        return "Sorry! Email %s already in signed up!" % (emailaddy)
+        app.logger.error("Duplicate email tried to insert into db: %s" % (emailaddy))
+        return render_template('alreadysignedup.html', youremail=emailaddy)
     return "You are signed up with email: %s and city: %s!" % (emailaddy, city)
 
 
