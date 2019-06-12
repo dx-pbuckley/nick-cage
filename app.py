@@ -94,16 +94,18 @@ def signup_post():
 
 
 @app.route('/admin/')
-def bulk_form():
+def admin():
     """Render the bulk send form page."""
     return render_template('bulkform.html')
 
 
 @app.route('/admin/', methods=['POST'])
-def bulk_form_post():
-    total_sent = send_bulk_emails()
-    return "%s emails sent" % (total_sent)
-
+def admin_post():
+    try:
+        total_sent = send_bulk_emails()
+    except:
+        return render_template('bulkfail.html')
+    return render_template('bulksent.html', total_sent=total_sent)
 
 @app.route('/jscheck/')
 def js_form():
@@ -157,7 +159,7 @@ def subject_phrase_picker(city):
 
 def send_sbemail(email_addy, city):
     given_pair, weather = subject_phrase_picker(city)
-    mailtext = '%s %s weather in %s!' % ( given_pair['phrasing'], weather, city)
+    mailtext = '%s %s in %s!' % ( given_pair['phrasing'], weather, city)
     mpayload = {'from': 'Excited User <mailgun@%s>' % (MG_DOMAIN),
                 'to': '%s' % (email_addy),
                 'subject': given_pair['subject'],
