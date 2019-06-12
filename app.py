@@ -11,6 +11,7 @@ import requests
 from flask import Flask, render_template, request, redirect, url_for
 import pymongo
 import json
+from email_validator import validate_email, EmailNotValidError
 
 app = Flask(__name__)
 app.debug = True
@@ -62,7 +63,7 @@ def about():
 
 @app.route('/signup/')
 def signup():
-    """Render the emailform page."""
+    """Render the signup page."""
     return render_template('emailform.html', top_hundred_cities=[x['name'] for x in TOP_HUNDRED_LIST])
 
 
@@ -70,17 +71,26 @@ def signup():
 def signup_post():
     emailaddy = request.form['emailaddress']
     city = request.form['city_name']
+    try:
+        v = validate_email(emailaddy) # validate and get info
+        normalizedemail = v["email"] # replace with normalized form
+        app.logger.debug("Successfully validated: %s | normalized as: %s" % (emailaddy, normalizedemail))
+    except EmailNotValidError as e:
+        # email is not valid, exception message is human-readable
+        app.logger.error("Invalid email %s: %s" % (emailaddy, str(e)))
+        return render_template('invalidemail.html', errmsg=(str(e)), youremail=emailaddy)
+
     # processed_email = emailaddy.upper()
     # return send_sbemail(processed_email, city_name)
     # addys = DB.em_addr # too many levels deep???
-    one_record = {'email': emailaddy, 'city': city }
+    one_record = {'email': normalizedemail, 'city': city }
     try:
         DB.emaddrcol.insert_one(one_record)
         app.logger.info("Inserting into db: %s / %s from client %s \n: record email %s, city %s" % (DB, DB.emaddrcol, CLIENT, one_record['email'], one_record['city']))
     except:
-        app.logger.error("Duplicate email tried to insert into db: %s" % (emailaddy))
-        return render_template('alreadysignedup.html', youremail=emailaddy)
-    return "You are signed up with email: %s and city: %s!" % (emailaddy, city)
+        app.logger.error("Duplicate email tried to insert into db: %s" % (normalizedemail))
+        return render_template('alreadysignedup.html', youremail=normalizedemail)
+    return render_template('signupsuccess.html', youremail=normalizedemail, yourcity=city)
 
 
 @app.route('/admin/')
