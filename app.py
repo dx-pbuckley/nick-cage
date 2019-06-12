@@ -28,7 +28,7 @@ WEATHERBIT_FORECAST_URL = 'https://api.weatherbit.io/v2.0/forecast/daily'
 CLIENT = pymongo.MongoClient(MONGODB_URI)
 DB = CLIENT['heroku_xncgtv8c']
 # not right, everything matches email including "com" etc
-# DB.em_addr.create_index([('email', pymongo.TEXT)], unique=True)
+DB.emaddrcol.create_index(('email'), unique=True)
 
 # sunny or +5 degrees
 NICE_PAIR = { "subject": "It's nice out! Enjoy a discount on us.",
@@ -75,7 +75,10 @@ def my_form_post():
     # addys = DB.em_addr # too many levels deep???
     one_record = {'email': emailaddy, 'city': city }
     app.logger.info("Inserting into db: %s / %s from client %s \n: record email %s, city %s" % (DB, DB.emaddrcol, CLIENT, one_record['email'], one_record['city']))
-    DB.emaddrcol.insert_one(one_record)
+    try:
+        DB.emaddrcol.insert_one(one_record)
+    except:
+        return "Sorry! Email %s already in signed up!" % (emailaddy)
     return "You are signed up with email: %s and city: %s!" % (emailaddy, city)
 
 
