@@ -21,3 +21,5 @@ gunicorn
 # ----------------------
 requests
 pymongo
+email_validator
+flask_recaptcha

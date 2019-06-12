@@ -9,13 +9,25 @@ This file creates your application.
 import os
 import requests
 from flask import Flask, render_template, request, redirect, url_for
+from time import time
 import pymongo
 import json
 from email_validator import validate_email, EmailNotValidError
+from flask_recaptcha import ReCaptcha
+
 
 app = Flask(__name__)
 app.debug = True
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'this_should_be_configured')
+
+app.config['ADMIN_PASS'] = os.environ.get('ADMIN_PASS', 'shouldda_set_admin_pass_%s' % (time()))
+
+# recaptcha config
+app.config['RECAPTCHA_SITE_KEY'] = os.environ.get('RECAPTCHA_SITE_KEY', 'shouldda_set_recaptcha_site_key')
+app.config['RECAPTCHA_SECRET_KEY'] = os.environ.get('RECAPTCHA_SECRET_KEY', 'shouldda_set_recaptcha_secret_key')
+app.config['RECAPTCHA_SIZE'] = 'compact'
+app.config['RECAPTCHA_THEME'] = 'dark'
+
+recaptcha = ReCaptcha(app=app)
 
 MONGODB_URI = os.environ.get('MONGODB_URI', 'shouldda_set_that_mongodb_uri')
 MG_API_KEY = os.environ.get('MAILGUN_API_KEY', 'shouldda_set_that_mg_api_key')
@@ -69,6 +81,13 @@ def signup():
 
 @app.route('/signup/', methods=['POST'])
 def signup_post():
+    if recaptcha.verify():
+        # SUCCESS
+        pass
+    else:
+        # FAILED
+        app.logger.error("Failed recaptcha")
+        return render_template('404.html')
     emailaddy = request.form['emailaddress']
     city = request.form['city_name']
     try:
