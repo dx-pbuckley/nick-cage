@@ -14,10 +14,14 @@ import pymongo
 import json
 from email_validator import validate_email, EmailNotValidError
 from flask_recaptcha import ReCaptcha
-
+from flask_sslify import SSLify
 
 app = Flask(__name__)
-app.debug = True
+
+if 'DYNO' in os.environ: # only trigger SSLify if the app is running on Heroku
+    sslify = SSLify(app)
+else:
+    app.debug = True
 
 app.config['ADMIN_PASS'] = os.environ.get('ADMIN_PASS', 'shouldda_set_admin_pass_%s' % (time()))
 
