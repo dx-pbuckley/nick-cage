@@ -1,0 +1,11 @@
+{% block css %}
+<style type="text/css">
+  #footer_text {
+    font-size:12px;
+    margin:15px 0;
+  }
+</style>
+{% endblock %}
+
+
+<p id="footer_text"><a href="{{ url_for('home') }}">Home</a> | <a href="{{ url_for('admin') }}">Admin</a></p>

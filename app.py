@@ -65,26 +65,15 @@ with open('static/top100cities.json') as f:
 # Routing for your application.
 ###
 
+
 @app.route('/')
 def home():
-    """Render website's home page."""
-    return render_template('home.html')
-
-
-@app.route('/about/')
-def about():
-    """Render the website's about page."""
-    return render_template('about.html')
-
-
-@app.route('/signup/')
-def signup():
     """Render the signup page."""
     return render_template('emailform.html', top_hundred_cities=[x['name'] for x in TOP_HUNDRED_LIST])
 
 
-@app.route('/signup/', methods=['POST'])
-def signup_post():
+@app.route('/', methods=['POST'])
+def home_post():
     if recaptcha.verify():
         # SUCCESS
         app.logger.debug("Passed recaptcha")
