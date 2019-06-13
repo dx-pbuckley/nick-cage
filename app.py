@@ -83,6 +83,7 @@ def signup():
 def signup_post():
     if recaptcha.verify():
         # SUCCESS
+        app.logger.debug("Passed recaptcha")
         pass
     else:
         # FAILED
@@ -99,9 +100,6 @@ def signup_post():
         app.logger.error("Invalid email %s: %s" % (emailaddy, str(e)))
         return render_template('invalidemail.html', errmsg=(str(e)), youremail=emailaddy)
 
-    # processed_email = emailaddy.upper()
-    # return send_sbemail(processed_email, city_name)
-    # addys = DB.em_addr # too many levels deep???
     one_record = {'email': normalizedemail, 'city': city }
     try:
         DB.emaddrcol.insert_one(one_record)
