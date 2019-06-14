@@ -38,7 +38,7 @@ recaptcha = ReCaptcha(app=app)
 MONGODB_URI = os.environ.get('MONGODB_URI', 'shouldda_set_that_mongodb_uri')
 MG_API_KEY = os.environ.get('MAILGUN_API_KEY', 'shouldda_set_that_mg_api_key')
 MG_DOMAIN = os.environ.get('MAILGUN_DOMAIN', 'shouldda_set_that_mg_domain')
-MG_API_URL = "https://api:%s@api.mailgun.net/v3/%s" % (MG_API_KEY, MG_DOMAIN)
+MG_API_URL='https://api.eu.mailgun.net/v3/%s/messages' % MG_DOMAIN
 
 WEATHERBIT_API_KEY = os.environ.get('WEATHERBIT_API_KEY', 'shouldda_set_that_wb_api_key')
 WEATHERBIT_API_URL = 'https://api.weatherbit.io/v2.0/current'
@@ -194,14 +194,14 @@ def send_sbemail(email_addy, city):
     """Send a single email, formatted with weather and phrasing to our liking."""
     given_pair, weather = subject_phrase_picker(city)
     mailtext = '%s %s in %s!' % ( given_pair['phrasing'], weather, city)
-    mpayload = {'from': 'Excited User <mailgun@%s>' % (MG_DOMAIN), # can I put my custom domain here, now? nickcage@tablestak.es?
-                'to': '%s' % (email_addy),
+    response = requests.post(
+        MG_API_URL,
+        auth=("api", MG_API_KEY),
+        data={'from': 'Nick Cage <nickcage@%s>' % (MG_DOMAIN),
+                'to': [email_addy],
                 'subject': given_pair['subject'],
-                'text': mailtext,
-                'html': '<b>HTML</b> body of test mailgun message as hitmal' # this html should be a bit better I think? can I get an animated gif of good/bad/avg weather there?
-    }
-    # uncomment to really send the email
-    # respo = requests.post(MG_API_URL + "/messages", params=mpayload)
+                'text': mailtext
+        })
     app.logger.info("Sent %s to: %s!" % (mailtext, email_addy))
     return "Sent %s to: %s!" % (mailtext, email_addy)
 
