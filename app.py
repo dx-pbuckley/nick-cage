@@ -198,9 +198,9 @@ def send_sbemail(email_addy, city):
         MG_API_URL,
         auth=("api", MG_API_KEY),
         data={'from': 'Nick Cage <nickcage@%s>' % (MG_DOMAIN),
-                'to': [email_addy],
-                'subject': given_pair['subject'],
-                'text': mailtext
+              'to': [email_addy],
+              'subject': given_pair['subject'],
+              'text': mailtext
         })
     app.logger.info("Sent %s to: %s!" % (mailtext, email_addy))
     return "Sent %s to: %s!" % (mailtext, email_addy)
