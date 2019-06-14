@@ -46,22 +46,20 @@ WEATHERBIT_FORECAST_URL = 'https://api.weatherbit.io/v2.0/forecast/daily'
 
 CLIENT = pymongo.MongoClient(MONGODB_URI)
 DB = CLIENT['heroku_xncgtv8c']
-# not right, everything matches email including "com" etc
 DB.emaddrcol.create_index(('email'), unique=True)
 
 # sunny or +5 degrees
-NICE_PAIR = { "subject": "It's nice out! Enjoy a discount on us.",
+NICE_PAIR = { "subject": "It's nice out! Enjoy a discount on us!",
               "phrasing": "Hope you are enjoying the" }
 # either precipitating or 5 degrees cooler than the average
-NOTNICE_PAIR = { "subject": "Not so nice out? That's okay, enjoy a discount on us.",
+NOTNICE_PAIR = { "subject": "Not so nice out? That's okay, enjoy a discount on us!",
                  "phrasing": "Take a break from the" }
-AVG_PAIR = { "subject": "Enjoy a discount on us.",
+AVG_PAIR = { "subject": "Enjoy a discount on us!",
              "phrasing": "Fine with the" }
 
 with open('static/top100cities.json') as f:
     TOP_HUNDRED_LIST = json.load(f)
 
-# TOP_HUNDRED_LIST = [ 'Bahstin', 'Nawyawk', 'Zebbs' ]
 ###
 # functions that need to be def'd prior to routes
 ###
@@ -99,6 +97,7 @@ def home():
 
 @app.route('/', methods=['POST'])
 def home_post():
+    """Signup an email address and city."""
     if recaptcha.verify():
         # SUCCESS
         app.logger.debug("Passed recaptcha")
@@ -137,26 +136,23 @@ def admin():
 
 @app.route('/admin/', methods=['POST'])
 def admin_post():
+    """ Submit the bulk email send form."""
     try:
         total_sent = send_bulk_emails()
     except:
         return render_template('bulkfail.html')
     return render_template('bulksent.html', total_sent=total_sent)
 
-@app.route('/jscheck/')
-def js_form():
-    """testing some js malarkey"""
-    return render_template('fakeform.html')
-
 
 # just mah functionsz
 
 def farenheit(ctemp):
+    """ Convert celcius to farenheit."""
     return round(9.0/5.0 * ctemp + 32)
 
 
 def avg_based_on_forecast(city):
-    """ calc the avg based on next 16 day forecast """
+    """Calculate the avg temp based on next 16 day forecast."""
     wparams = { 'city': city,
                 'key': WEATHERBIT_API_KEY
     }
@@ -166,11 +162,12 @@ def avg_based_on_forecast(city):
 
 
 def fetch_weather(city):
+    """Fetch current weather for given city."""
     wparams = { 'city': city,
                 'key': WEATHERBIT_API_KEY
     }
     resp = requests.get(WEATHERBIT_API_URL, params=wparams)
-    # this works, need to likely raise for status, validate city (or pre-validate on the intake?)
+    # this works, need to likely raise for status?
     full_weather = json.loads(resp.text)
     app.logger.info("Got full_weather: %s" % (full_weather))
     weather_dict = {
@@ -194,13 +191,14 @@ def subject_phrase_picker(city):
 
 
 def send_sbemail(email_addy, city):
+    """Send a single email, formatted with weather and phrasing to our liking."""
     given_pair, weather = subject_phrase_picker(city)
     mailtext = '%s %s in %s!' % ( given_pair['phrasing'], weather, city)
-    mpayload = {'from': 'Excited User <mailgun@%s>' % (MG_DOMAIN),
+    mpayload = {'from': 'Excited User <mailgun@%s>' % (MG_DOMAIN), # can I put my custom domain here, now? nickcage@tablestak.es?
                 'to': '%s' % (email_addy),
                 'subject': given_pair['subject'],
                 'text': mailtext,
-                'html': '<b>HTML</b> body of test mailgun message as hitmal'
+                'html': '<b>HTML</b> body of test mailgun message as hitmal' # this html should be a bit better I think? can I get an animated gif of good/bad/avg weather there?
     }
     # uncomment to really send the email
     # respo = requests.post(MG_API_URL + "/messages", params=mpayload)
@@ -209,12 +207,13 @@ def send_sbemail(email_addy, city):
 
 
 def send_bulk_emails():
-    """ Send the emails out """
+    """Send multiple emails."""
     email_count = 0
     for email in DB.emaddrcol.find(): # collection:
         send_sbemail(email['email'], email['city'])
         email_count += 1
     return email_count
+
 
 ###
 # The functions below should be applicable to all Flask apps.
