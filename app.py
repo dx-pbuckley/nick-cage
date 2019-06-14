@@ -176,22 +176,30 @@ def fetch_weather(city):
         'precip': full_weather['data'][0]['precip'],
         'forecast_temp': avg_based_on_forecast(city)
     }
+    print("Trimmed down weather_dict: %s" % (weather_dict))
     return weather_dict
 
 
 def subject_phrase_picker(city):
     weather = fetch_weather(city)
-    if weather['precip'] or weather['precip'] > 0 or weather['temp'] <= (weather['forecast_temp'] - 5):
+    print("Picking our weather-dependent phrase for weather %s and city %s" % (weather, city))
+    if weather.get('precip') or weather.get('precip') > 0 or weather['temp'] <= (weather['forecast_temp'] - 5):
+        print("Notnice weather discovered")
         phrase = NOTNICE_PAIR
     elif weather['temp'] >= (weather['forecast_temp'] + 5):
+        print("Nice weather discovered")
         phrase = NICE_PAIR
     else:
+        print("Avg weather discovered")
         phrase = AVG_PAIR
+    print("Phrase chosen: %s" % (phrase))
+    print("Weather determined to be: %s and %s" % (weather['temp'], weather['conditions']))
     return phrase, "%s and %s" % (weather['temp'], weather['conditions'])
 
 
 def send_sbemail(email_addy, city):
     """Send a single email, formatted with weather and phrasing to our liking."""
+    print("Single email send attempt: %s, %s" % (email_addy, city))
     given_pair, weather = subject_phrase_picker(city)
     mailtext = '%s %s in %s!' % ( given_pair['phrasing'], weather, city)
     print("Going to try a mailgun post to: %s with subject %s" % (email_addy, given_pair['subject']))
