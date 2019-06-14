@@ -100,29 +100,29 @@ def home_post():
     """Signup an email address and city."""
     if recaptcha.verify():
         # SUCCESS
-        app.logger.debug("Passed recaptcha")
+        print("Passed recaptcha")
         pass
     else:
         # FAILED
-        app.logger.error("Failed recaptcha")
+        print("Failed recaptcha")
         return render_template('404.html')
     emailaddy = request.form['emailaddress']
     city = request.form['city_name']
     try:
         v = validate_email(emailaddy) # validate and get info
         normalizedemail = v["email"] # replace with normalized form
-        app.logger.debug("Successfully validated: %s | normalized as: %s" % (emailaddy, normalizedemail))
+        print("Successfully validated: %s | normalized as: %s" % (emailaddy, normalizedemail))
     except EmailNotValidError as e:
         # email is not valid, exception message is human-readable
-        app.logger.error("Invalid email %s: %s" % (emailaddy, str(e)))
+        print("Invalid email %s: %s" % (emailaddy, str(e)))
         return render_template('invalidemail.html', errmsg=(str(e)), youremail=emailaddy)
 
     one_record = {'email': normalizedemail, 'city': city }
     try:
         DB.emaddrcol.insert_one(one_record)
-        app.logger.info("Inserting into db: %s / %s from client %s \n: record email %s, city %s" % (DB, DB.emaddrcol, CLIENT, one_record['email'], one_record['city']))
+        print("Inserting into db: %s / %s from client %s \n: record email %s, city %s" % (DB, DB.emaddrcol, CLIENT, one_record['email'], one_record['city']))
     except:
-        app.logger.error("Duplicate email tried to insert into db: %s" % (normalizedemail))
+        print("Duplicate email tried to insert into db: %s" % (normalizedemail))
         return render_template('alreadysignedup.html', youremail=normalizedemail)
     return render_template('signupsuccess.html', youremail=normalizedemail, yourcity=city)
 
@@ -169,7 +169,7 @@ def fetch_weather(city):
     resp = requests.get(WEATHERBIT_API_URL, params=wparams)
     # this works, need to likely raise for status?
     full_weather = json.loads(resp.text)
-    app.logger.info("Got full_weather: %s" % (full_weather))
+    print("Got full_weather: %s" % (full_weather))
     weather_dict = {
         'temp': farenheit(full_weather['data'][0]['temp']),
         'conditions': full_weather['data'][0]['weather']['description'].lower(),
@@ -202,7 +202,8 @@ def send_sbemail(email_addy, city):
               'subject': given_pair['subject'],
               'text': mailtext
         })
-    app.logger.info("Sent %s to: %s!" % (mailtext, email_addy))
+    print("status: %s | %s and response: %s" % (response.status_code, response.reason, response.text))
+    print("Attempted send %s to: %s!" % (mailtext, email_addy))
     return "Sent %s to: %s!" % (mailtext, email_addy)
 
 
