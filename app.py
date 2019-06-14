@@ -194,6 +194,7 @@ def send_sbemail(email_addy, city):
     """Send a single email, formatted with weather and phrasing to our liking."""
     given_pair, weather = subject_phrase_picker(city)
     mailtext = '%s %s in %s!' % ( given_pair['phrasing'], weather, city)
+    print("Going to try a mailgun post to: %s with subject %s" % (email_addy, given_pair['subject']))
     response = requests.post(
         MG_API_URL,
         auth=("api", MG_API_KEY),
