@@ -211,8 +211,10 @@ def send_bulk_emails():
     """Send multiple emails."""
     email_count = 0
     for email in DB.emaddrcol.find(): # collection:
+        print("About to send to %s" % (email['email']))
         send_sbemail(email['email'], email['city'])
         email_count += 1
+    print("Processed %s email attempts" % (email_count))
     return email_count
 
 
