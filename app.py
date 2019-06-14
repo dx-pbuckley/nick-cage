@@ -170,6 +170,9 @@ def fetch_weather(city):
     # this works, need to likely raise for status?
     full_weather = json.loads(resp.text)
     print("Got full_weather: %s" % (full_weather))
+    if not full_weather['data'][0]['precip']:
+        print("Precip was None, coercing to 0")
+        full_weather['data'][0]['precip'] = 0
     weather_dict = {
         'temp': farenheit(full_weather['data'][0]['temp']),
         'conditions': full_weather['data'][0]['weather']['description'].lower(),
@@ -183,7 +186,7 @@ def fetch_weather(city):
 def subject_phrase_picker(city):
     weather = fetch_weather(city)
     print("Picking our weather-dependent phrase for weather %s and city %s" % (weather, city))
-    if weather.get('precip') or weather.get('precip') > 0 or weather['temp'] <= (weather['forecast_temp'] - 5):
+    if weather['precip'] > 0 or weather['temp'] <= (weather['forecast_temp'] - 5):
         print("Notnice weather discovered")
         phrase = NOTNICE_PAIR
     elif weather['temp'] >= (weather['forecast_temp'] + 5):
