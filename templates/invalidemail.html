@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Page Definitely Not Found{% endblock %}
+{% block title %}Problem with email address.{% endblock %}
 
 {% block css %}
 <style type="text/css">
@@ -21,9 +21,7 @@
 </style>
 {% endblock %}
 
-
 {% block main %}
-<h1>404</h1>
-<p>That page doesn't even exist! Can't get there from here!</p>
-<p>Why don't you just try the <a href="{{ url_for('home') }}">signup</a> page?</p>
+<h1>Sorry!</h1>
+<p>Problem with {{ youremail }}! {{ errmsg }} <a href="{{ url_for('home') }}">Try again</a>?</p>
 {% endblock %}

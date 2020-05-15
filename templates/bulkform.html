@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+
+{% block css %}
+<style type="text/css">
+  body{
+    padding-top: 40px;
+  }
+  h1, h3, p{
+    text-align:center;
+  }
+  h1{
+    font-size:64px;
+    margin:75px 0 50px;
+  }
+  p{
+    font-size:24px;
+    margin:15px 0;
+  }
+  #bulk_form {
+    width:90%;
+    background-color: #bdd2ff;
+    border: 1px solid white;
+    margin: 50px auto 0;
+    padding: 1em;
+    -moz-border-radius: 10px;
+    -webkit-border-radius: 10px;
+    text-align: center;
+  }
+  input, form a {
+    border: none;
+    margin-right: 1em;
+    padding: 6px;
+    text-decoration: none;
+    font-size: 12px;
+    -moz-border-radius: 4px;
+    -webkit-border-radius: 4px;
+    background: #cfdeff;
+    color: black;
+    box-shadow: 0 1px 0 white;
+    -moz-box-shadow: 0 1px 0 white;
+    -webkit-box-shadow: 0 1px 0 white;
+    margin: auto;
+  }
+</style>
+{% endblock %}
+
+
+{% block main %}
+<div id="bulk_form">
+<h3>Admin Interface for Weather Emails</h3>
+<form name="bulkform" method="POST" action="#">
+    <p>Process Email Job? (send emails out to list)</p>
+    <p><input type="submit" name="submit" value="Send"></p>
+</form>
+</div>
+{% endblock %}

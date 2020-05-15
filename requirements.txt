@@ -15,3 +15,12 @@ mock
 # ----------------------
 gevent
 gunicorn
+
+# ----------------------
+# Me Libs
+# ----------------------
+requests
+pymongo
+email_validator
+flask_recaptcha
+flask-sslify
